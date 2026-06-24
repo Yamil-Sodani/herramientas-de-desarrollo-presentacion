@@ -1,0 +1,226 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Paul Car's - Dashboard</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.0/font/bootstrap-icons.css" rel="stylesheet">
+    <link href="/css/style.css" rel="stylesheet">
+    <style>
+        .stat-card {
+            background: white;
+            border-radius: 10px;
+            padding: 20px;
+            margin-bottom: 20px;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+            border-left: 4px solid #2a5298;
+        }
+        .stat-card h6 {
+            color: #666;
+            font-size: 13px;
+            text-transform: uppercase;
+            margin-bottom: 10px;
+        }
+        .stat-card .number {
+            font-size: 32px;
+            font-weight: bold;
+            color: #1e3c72;
+        }
+        .stat-card.vehicles {
+            border-left-color: #28a745;
+        }
+        .stat-card.income {
+            border-left-color: #ffc107;
+        }
+        .stat-card.clients {
+            border-left-color: #17a2b8;
+        }
+        .stat-card.rentals {
+            border-left-color: #dc3545;
+        }
+    </style>
+</head>
+<body>
+    <div class="container-fluid">
+        <div class="row">
+            <!-- Sidebar -->
+            <nav class="col-md-2 d-md-block bg-dark sidebar">
+                <div class="position-sticky pt-3">
+                    <div class="sidebar-header mb-4">
+                        <h5 class="text-warning">🚗 PAUL CAR'S</h5>
+                        <small class="text-muted">Gestión de Alquiler</small>
+                    </div>
+
+                    <ul class="nav flex-column">
+                        <li class="nav-item">
+                            <a class="nav-link active" th:href="@{/dashboard}">
+                                <i class="bi bi-speedometer2"></i> Dashboard
+                            </a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link" th:href="@{/vehiculos}">
+                                <i class="bi bi-car-front"></i> Vehículos
+                            </a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link" th:href="@{/clientes}">
+                                <i class="bi bi-people"></i> Clientes
+                            </a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link" th:href="@{/alquileres}">
+                                <i class="bi bi-calendar-check"></i> Alquileres
+                            </a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link" th:href="@{/pagos}">
+                                <i class="bi bi-credit-card"></i> Pagos
+                            </a>
+                        </li>
+                    </ul>
+
+                    <hr class="my-3">
+
+                    <ul class="nav flex-column">
+                        <li class="nav-item">
+                            <a class="nav-link text-danger" th:href="@{/logout}">
+                                <i class="bi bi-box-arrow-right"></i> Cerrar Sesión
+                            </a>
+                        </li>
+                    </ul>
+                </div>
+            </nav>
+
+            <!-- Main content -->
+            <main class="col-md-10 ms-sm-auto px-md-4">
+                <div class="d-flex justify-content-between flex-wrap flex-md-nowrap align-items-center pt-3 pb-2 mb-3 border-bottom">
+                    <h1 class="h2">Dashboard General</h1>
+                    <div class="text-muted">
+                        <small th:text="'Resumen del sistema — ' + #calendars.format(#dates.createNow(), 'EEEE, d MMMM yyyy')"></small>
+                    </div>
+                </div>
+
+                <!-- Stats Cards -->
+                <div class="row mb-4">
+                    <div class="col-md-3">
+                        <div class="stat-card rentals">
+                            <h6>Alquileres Activos</h6>
+                            <div class="number" th:text="${alquilesActivos}"></div>
+                            <small class="text-muted" th:text="${alquilesCompletados} + ' completados este mes'"></small>
+                        </div>
+                    </div>
+                    <div class="col-md-3">
+                        <div class="stat-card vehicles">
+                            <h6>Vehículos Disponibles</h6>
+                            <div class="number" th:text="${vehiculosDisponibles}"></div>
+                            <small class="text-muted" th:text="'de ' + ${vehiculosTotal} + ' vehículos en flota'"></small>
+                        </div>
+                    </div>
+                    <div class="col-md-3">
+                        <div class="stat-card income">
+                            <h6>Ingresos Totales</h6>
+                            <div class="number" th:text="'$/ ' + ${ingresosTotales}"></div>
+                            <small class="text-muted">Pagos registrados confirmados</small>
+                        </div>
+                    </div>
+                    <div class="col-md-3">
+                        <div class="stat-card clients">
+                            <h6>Clientes Activos</h6>
+                            <div class="number" th:text="${clientesActivos}"></div>
+                            <small class="text-muted" th:text="'de ' + ${clientesRegistrados} + ' clientes registrados'"></small>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Charts Row -->
+                <div class="row">
+                    <div class="col-md-8 mb-4">
+                        <div style="background: white; padding: 20px; border-radius: 10px; box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);">
+                            <h5 class="mb-3">Ingresos Mensuales</h5>
+                            <p class="text-muted small">Enero – Junio 2026</p>
+                            <canvas id="ingresoChart" style="max-height: 300px;"></canvas>
+                        </div>
+                    </div>
+                    <div class="col-md-4 mb-4">
+                        <div style="background: white; padding: 20px; border-radius: 10px; box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);">
+                            <h5 class="mb-3">Flota por Categoría</h5>
+                            <p class="text-muted small" th:text="${vehiculosTotal} + ' vehículos totales'"></p>
+                            <canvas id="categoriaChart" style="max-height: 300px;"></canvas>
+                        </div>
+                    </div>
+                </div>
+            </main>
+        </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@3.9.1/dist/chart.min.js"></script>
+    <script>
+        // Gráfico de ingresos mensuales
+        const ctxIngresos = document.getElementById('ingresoChart').getContext('2d');
+        new Chart(ctxIngresos, {
+            type: 'bar',
+            data: {
+                labels: ['Ene', 'Feb', 'Mar', 'Abr', 'May', 'Jun'],
+                datasets: [{
+                    label: 'Ingresos',
+                    data: [650, 1950, 1300, 1400, 2100, 800],
+                    backgroundColor: '#1e3c72',
+                    borderColor: '#1e3c72',
+                    borderWidth: 0,
+                    borderRadius: 5
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: true,
+                plugins: {
+                    legend: {
+                        display: false
+                    }
+                },
+                scales: {
+                    y: {
+                        beginAtZero: true,
+                        ticks: {
+                            callback: function(value) {
+                                return '$' + value;
+                            }
+                        }
+                    }
+                }
+            }
+        });
+
+        // Gráfico de flota por categoría (Donut)
+        const ctxCategoria = document.getElementById('categoriaChart').getContext('2d');
+        new Chart(ctxCategoria, {
+            type: 'doughnut',
+            data: {
+                labels: ['SUV', 'Sedan', 'Deportivo', 'Camioneta'],
+                datasets: [{
+                    data: [4, 2, 2, 2],
+                    backgroundColor: [
+                        '#1e3c72',
+                        '#f4b860',
+                        '#28a745',
+                        '#dc3545'
+                    ],
+                    borderColor: 'white',
+                    borderWidth: 2
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: true,
+                plugins: {
+                    legend: {
+                        position: 'bottom'
+                    }
+                }
+            }
+        });
+    </script>
+</body>
+</html>
